@@ -34,14 +34,14 @@ export class CommonService {
             this.searchResults.push(copyOfSecurityList[mid]);
             this.searchBefore(copyOfSecurityList.slice(0,mid), description);
             this.searchAfter(copyOfSecurityList.slice(mid+1), description);
-            return copyOfSecurityList[mid];
+            return this.searchResults;
         } else if (copyOfSecurityList[mid].Description.slice(0,description.length).toString() < description && copyOfSecurityList.length > 1) {
             this.searchStockList(copyOfSecurityList.splice(mid+1), description);
         } else if (copyOfSecurityList[mid].Description.slice(0,description.length).toString() > description && copyOfSecurityList.length > 1) {
             this.searchStockList(copyOfSecurityList.splice(0,mid), description);
         } else {
             console.log('not found');
-            return -1;
+            return [];
         }
     }
 
