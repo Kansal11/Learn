@@ -1,7 +1,8 @@
-import { Component, OnDestroy, AfterViewInit } from '@angular/core';
-import { Observable } from 'rxjs/Observable';
+import { Component, OnDestroy, OnInit, AfterViewInit } from '@angular/core';
+import { Observable } from 'rxjs/Rx';
 import { Subscription } from 'rxjs/Subscription';
 import { CommonService } from './shared/commonService';
+import { Router } from '@angular/router';
 
 
 @Component({
@@ -9,17 +10,23 @@ import { CommonService } from './shared/commonService';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
-export class AppComponent implements OnDestroy{
+export class AppComponent implements OnInit{
   searchItems: any[];
   searchText: string;
   getResults: Subscription;
+  detailsShown: boolean;
 
-  constructor(private commonService:CommonService) {
+  constructor(private commonService:CommonService, private router: Router) {
 
+  }
+
+  ngOnInit() {
+    this.detailsShown = false;
   }
 
   ngAfterViewInit() {
     var input: any = document.getElementById('search');
+    var self = this;
     const search = Observable.fromEvent(input, 'keyup').debounceTime(500)
         .do(() => {
             if (input.value == '') {
@@ -28,15 +35,15 @@ export class AppComponent implements OnDestroy{
 
             }
         })
-        .switchMap(() =>
-            this.commonService.findInStockDescription(input.value)
-        );
+        .switchMap(function() {
+            return self.commonService.findInStockDescription(input.value);
+        });
 
     this.getResults = search.subscribe(
         (response: any) => {
             if (response) {
-                if (this.searchText != null && this.searchText != undefined && this.searchText != '') {
-                    this.searchItems = response.items;
+                if (this.searchText) {
+                    this.searchItems = response;
                 } else {
                     this.searchItems = null;
                 }
@@ -45,6 +52,11 @@ export class AppComponent implements OnDestroy{
             }
         }
     );
+  }
+
+  showDetails = function(item) {
+      this.router.navigate(['/details',{'SecType':item.SecType,'Ticker':item.Ticker,'Cusip':item.Cusip,'Description':item.Description}]);
+      this.detailsShown = true;
   }
 
   ngOnDestroy() {
